@@ -1618,6 +1618,27 @@ HMICapabilitiesImpl::GetDefaultInitializedCapabilities() const {
   return default_initialized_capabilities_;
 }
 
+void HMICapabilitiesImpl::InterfaceResponseReceived(
+    hmi_apis::FunctionID::eType requested_interface) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (app_mngr_.IsHMICooperating()) {
+    return;
+  }
+
+  auto it = find(interfaces_to_request_.begin(),
+                 interfaces_to_request_.end(),
+                 requested_interface);
+  if (it != interfaces_to_request_.end()) {
+    interfaces_to_request_.erase(it);
+    LOG4CXX_DEBUG(logger_,
+                  "Wait for " << interfaces_to_request_.size() << " responses");
+    if (interfaces_to_request_.empty()) {
+      app_mngr_.SetHMICooperating(true);
+    }
+  }
+}
+
 bool HMICapabilitiesImpl::AllFieldsSaved(
     const Json::Value& root_node,
     const std::string& interface_name,
@@ -1657,6 +1678,21 @@ bool HMICapabilitiesImpl::AllFieldsSaved(
   }
 
   return true;
+}
+
+void HMICapabilitiesImpl::InitInterfacesToBeRequested() {
+  interfaces_to_request_ = {hmi_apis::FunctionID::RC_GetCapabilities,
+                            hmi_apis::FunctionID::TTS_GetLanguage,
+                            hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+                            hmi_apis::FunctionID::TTS_GetCapabilities,
+                            hmi_apis::FunctionID::UI_GetLanguage,
+                            hmi_apis::FunctionID::UI_GetSupportedLanguages,
+                            hmi_apis::FunctionID::UI_GetCapabilities,
+                            hmi_apis::FunctionID::VR_GetLanguage,
+                            hmi_apis::FunctionID::VR_GetSupportedLanguages,
+                            hmi_apis::FunctionID::VR_GetCapabilities,
+                            hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+                            hmi_apis::FunctionID::Buttons_GetCapabilities};
 }
 
 void HMICapabilitiesImpl::PrepareUiJsonValueForSaving(
@@ -1964,6 +2000,32 @@ bool HMICapabilitiesImpl::DeleteCachedCapabilitiesFile() const {
 
 void HMICapabilitiesImpl::set_ccpu_version(const std::string& ccpu_version) {
   ccpu_version_ = ccpu_version;
+}
+
+bool HMICapabilitiesImpl::matches_ccpu_version(
+    const std::string& ccpu_version) {
+  return ccpu_version_ == ccpu_version;
+}
+
+void HMICapabilitiesImpl::update_capabilities_depending_on_version(
+    const std::string& ccpu_version) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (matches_ccpu_version(ccpu_version)) {
+    app_mngr_.SetHMICooperating(true);
+    app_mngr_.OnSendGetCapabilitiesForInterface();
+    return;
+  }
+
+  set_ccpu_version(ccpu_version);
+  DeleteCachedCapabilitiesFile();
+
+  if (false == LoadCapabilitiesFromFile()) {
+    LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
+  }
+
+  InitInterfacesToBeRequested();
+  app_mngr_.OnSendGetCapabilitiesForInterface();
 }
 
 const std::string& HMICapabilitiesImpl::ccpu_version() const {

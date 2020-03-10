@@ -78,6 +78,11 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   void set_ccpu_version(const std::string& ccpu_version) OVERRIDE;
 
+  bool matches_ccpu_version(const std::string& ccpu_version) OVERRIDE;
+
+  void update_capabilities_depending_on_version(
+      const std::string& ccpu_version) OVERRIDE;
+
   const std::string& ccpu_version() const OVERRIDE;
 
   bool attenuated_supported() const OVERRIDE;
@@ -240,6 +245,11 @@ class HMICapabilitiesImpl : public HMICapabilities {
 
   std::set<hmi_apis::FunctionID::eType> GetDefaultInitializedCapabilities()
       const OVERRIDE;
+
+  void InterfaceResponseReceived(
+      hmi_apis::FunctionID::eType requested_interface) OVERRIDE;
+
+  void InitInterfacesToBeRequested() OVERRIDE;
 
  protected:
   /**
@@ -433,6 +443,7 @@ class HMICapabilitiesImpl : public HMICapabilities {
   HMILanguageHandler hmi_language_handler_;
 
   std::set<hmi_apis::FunctionID::eType> default_initialized_capabilities_;
+  std::set<hmi_apis::FunctionID::eType> interfaces_to_request_;
 
   DISALLOW_COPY_AND_ASSIGN(HMICapabilitiesImpl);
 };

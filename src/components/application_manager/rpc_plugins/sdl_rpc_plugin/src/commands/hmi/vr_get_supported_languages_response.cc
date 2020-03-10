@@ -60,6 +60,9 @@ void VRGetSupportedLanguagesResponse::Run() {
       static_cast<hmi_apis::Common_Result::eType>(
           (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::VR_GetSupportedLanguages);
+
   if (hmi_apis::Common_Result::SUCCESS == code) {
     HMICapabilities& hmi_capabilities = hmi_capabilities_;
     hmi_capabilities.set_vr_supported_languages(
@@ -78,7 +81,8 @@ void VRGetSupportedLanguagesResponse::Run() {
 
 void VRGetSupportedLanguagesResponse::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::VR_GetSupportedLanguages);
 }
 }  // namespace commands
 

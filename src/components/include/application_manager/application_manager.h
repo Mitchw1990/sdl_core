@@ -466,6 +466,12 @@ class ApplicationManager {
 
   virtual void OnHMIStartedCooperation() = 0;
 
+  /**
+   * @brief Send GetCapabilities requests for
+   * each interface (VR, TTS, UI etc) to HMI
+   */
+  virtual void OnSendGetCapabilitiesForInterface() = 0;
+
   virtual void DisconnectCloudApp(ApplicationSharedPtr app) = 0;
 
   virtual void RefreshCloudAppInformation() = 0;
@@ -483,6 +489,13 @@ class ApplicationManager {
   GetCloudAppConnectionStatus(ApplicationConstSharedPtr app) const = 0;
 
   virtual bool IsHMICooperating() const = 0;
+
+  /*
+   * @brief Sets state for hmi cooperating
+   * @param hmi_cooperating new state to be set
+   */
+  virtual void SetHMICooperating(bool hmi_cooperating) = 0;
+
   /**
    * @brief Notifies all components interested in Vehicle Data update
    * i.e. new value of odometer etc and returns list of applications

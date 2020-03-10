@@ -59,6 +59,9 @@ void TTSGetLanguageResponse::Run() {
   const Common_Result::eType result_code = static_cast<Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::TTS_GetLanguage);
+
   if (Common_Result::SUCCESS != result_code) {
     LOG4CXX_DEBUG(logger_,
                   "Request was not successful. Don't change HMI capabilities");
@@ -93,7 +96,8 @@ void TTSGetLanguageResponse::Run() {
 
 void TTSGetLanguageResponse::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::TTS_GetLanguage);
 }
 
 }  // namespace commands

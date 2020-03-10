@@ -96,6 +96,20 @@ class HMICapabilities {
   virtual void set_ccpu_version(const std::string& ccpu_version) = 0;
 
   /**
+   * @brief Interface that checks for compliance new software version of the
+   * target with last received
+   * @param ccpu_version Received system/hmi software version
+   */
+  virtual bool matches_ccpu_version(const std::string& ccpu_version) = 0;
+
+  /**
+   * @brief Interface that update capabilities depending on ccpu_version
+   * @param ccpu_version Received system/hmi software version
+   */
+  virtual void update_capabilities_depending_on_version(
+      const std::string& ccpu_version) = 0;
+
+  /**
    * @brief Returns software version of the target
    * @return TRUE if it supported, otherwise FALSE
    */
@@ -521,6 +535,18 @@ class HMICapabilities {
    */
   virtual std::set<hmi_apis::FunctionID::eType>
   GetDefaultInitializedCapabilities() const = 0;
+
+  /**
+   * @brief Notified that response was received from requested interface
+   * @param requested_interface interface for which received response
+   */
+  virtual void InterfaceResponseReceived(
+      hmi_apis::FunctionID::eType requested_interface) = 0;
+
+  /**
+   * @brief Init interfaces for which should wait for the responses
+   */
+  virtual void InitInterfacesToBeRequested() = 0;
 };
 
 }  //  namespace application_manager

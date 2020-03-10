@@ -84,7 +84,7 @@ const SystemInfo GetSystemInfoResponse::GetSystemInfo(
   info.language = application_manager::MessageHelper::CommonLanguageToString(
       static_cast<hmi_apis::Common_Language::eType>(lang_code));
 
-  hmi_capabilities_.set_ccpu_version(info.ccpu_version);
+  hmi_capabilities_.update_capabilities_depending_on_version(info.ccpu_version);
 
   return info;
 }

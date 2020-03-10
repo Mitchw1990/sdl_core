@@ -55,6 +55,9 @@ void VRGetCapabilitiesResponse::Run() {
   const auto result_code = static_cast<hmi_apis::Common_Result::eType>(
       (*message_)[strings::params][hmi_response::code].asInt());
 
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::VR_GetCapabilities);
+
   if (hmi_apis::Common_Result::SUCCESS != result_code) {
     LOG4CXX_DEBUG(logger_,
                   "Request was not successful. Don't change HMI capabilities");
@@ -80,7 +83,8 @@ void VRGetCapabilitiesResponse::Run() {
 
 void VRGetCapabilitiesResponse::onTimeOut() {
   LOG4CXX_AUTO_TRACE(logger_);
-
+  hmi_capabilities_.InterfaceResponseReceived(
+      hmi_apis::FunctionID::VR_GetCapabilities);
 }
 }  // namespace commands
 

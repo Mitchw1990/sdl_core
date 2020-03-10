@@ -402,6 +402,8 @@ class ApplicationManagerImpl
   void ConnectToDevice(const std::string& device_mac) OVERRIDE;
   void OnHMIStartedCooperation() OVERRIDE;
 
+  void OnSendGetCapabilitiesForInterface() OVERRIDE;
+
   void DisconnectCloudApp(ApplicationSharedPtr app) OVERRIDE;
 
   void RefreshCloudAppInformation() OVERRIDE;
@@ -928,6 +930,7 @@ class ApplicationManagerImpl
    */
   bool IsHMICooperating() const OVERRIDE;
 
+  void SetHMICooperating(bool hmi_cooperating) OVERRIDE;
   /**
    * @brief Method used to send default app tts globalProperties
    * in case they were not provided from mobile side after defined time
