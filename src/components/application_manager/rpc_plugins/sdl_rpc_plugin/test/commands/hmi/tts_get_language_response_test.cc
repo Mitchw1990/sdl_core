@@ -105,6 +105,23 @@ TEST_F(TTSGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   command->Run();
 }
 
+TEST_F(TTSGetLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<TTSGetLanguageResponse> command(
+      CreateCommand<TTSGetLanguageResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              InterfaceResponseReceived(hmi_apis::FunctionID::TTS_GetLanguage))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace tts_get_language_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

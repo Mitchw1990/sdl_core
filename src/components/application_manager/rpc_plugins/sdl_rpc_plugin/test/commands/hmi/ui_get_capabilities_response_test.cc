@@ -362,6 +362,24 @@ TEST_F(UIGetCapabilitiesResponseTest, SetSystemDisplayCapabilities_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ResponseFromHMIPtr command(
+      CreateCommand<UIGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      InterfaceResponseReceived(hmi_apis::FunctionID::UI_GetCapabilities))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace ui_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

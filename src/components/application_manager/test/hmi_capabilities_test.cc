@@ -683,6 +683,111 @@ TEST_F(HMICapabilitiesTest, SetIviCooperating) {
   EXPECT_EQ(true, hmi_capabilities_test->is_ivi_cooperating());
 }
 
+TEST_F(
+    HMICapabilitiesTest,
+    UpdateCapabilitiesDependingOn_ccpuVersion_FromCacheForOld_RequestForNew) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+  std::string ccpu_version = "4.1.3.B_EB355B";
+  std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_not_valid_file =
+      "hmi_capabilities_not_valid.json";
+
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_not_valid_file));
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
+
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+
+  EXPECT_CALL(mock_app_mngr, SetHMICooperating(true));
+  EXPECT_CALL(mock_app_mngr, OnSendGetCapabilitiesForInterface()).Times(2);
+
+  hmi_capabilities->set_ccpu_version(ccpu_version);
+  hmi_capabilities->update_capabilities_depending_on_version(ccpu_version);
+
+  EXPECT_EQ(ccpu_version, hmi_capabilities->ccpu_version());
+
+  hmi_capabilities->update_capabilities_depending_on_version(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities->ccpu_version());
+}
+
+TEST_F(HMICapabilitiesTest,
+       UpdateCapabilitiesForNew_ccpuVersion_DeleteCacheFile) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+  std::string ccpu_version = "4.1.3.B_EB355B";
+  std::string ccpu_version_new = "5.1.3.B_EB355B";
+  const std::string hmi_capabilities_not_valid_file =
+      "hmi_capabilities_not_valid.json";
+
+  file_system::CreateFile(file_cache_name_);
+  EXPECT_TRUE(file_system::FileExists(file_cache_name_));
+
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillOnce(ReturnRef(hmi_capabilities_not_valid_file));
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillOnce(ReturnRef(file_cache_name_));
+
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+
+  hmi_capabilities->set_ccpu_version(ccpu_version);
+  hmi_capabilities->update_capabilities_depending_on_version(ccpu_version_new);
+  EXPECT_EQ(ccpu_version_new, hmi_capabilities->ccpu_version());
+
+  EXPECT_FALSE(file_system::FileExists(file_cache_name_));
+}
+
+TEST_F(HMICapabilitiesTest,
+       RequestCapabilitiesAfterSWUpdate_ClearRequestedInterfaceAfterResponse) {
+  MockApplicationManager mock_app_mngr;
+  event_engine_test::MockEventDispatcher mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
+  std::vector<hmi_apis::FunctionID::eType> interfaces_to_request_ = {
+      hmi_apis::FunctionID::RC_GetCapabilities,
+      hmi_apis::FunctionID::TTS_GetLanguage,
+      hmi_apis::FunctionID::TTS_GetSupportedLanguages,
+      hmi_apis::FunctionID::TTS_GetCapabilities,
+      hmi_apis::FunctionID::UI_GetLanguage,
+      hmi_apis::FunctionID::UI_GetSupportedLanguages,
+      hmi_apis::FunctionID::UI_GetCapabilities,
+      hmi_apis::FunctionID::VR_GetLanguage,
+      hmi_apis::FunctionID::VR_GetSupportedLanguages,
+      hmi_apis::FunctionID::VR_GetCapabilities,
+      hmi_apis::FunctionID::VehicleInfo_GetVehicleType,
+      hmi_apis::FunctionID::Buttons_GetCapabilities};
+
+  EXPECT_CALL(mock_app_mngr, get_settings())
+      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+
+  ON_CALL(mock_app_mngr, IsHMICooperating()).WillByDefault(Return(false));
+  EXPECT_CALL(mock_app_mngr, event_dispatcher())
+      .WillOnce(ReturnRef(mock_dispatcher));
+  std::shared_ptr<HMICapabilitiesForTesting> hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+
+  hmi_capabilities->InitInterfacesToBeRequested();
+  EXPECT_CALL(mock_app_mngr, SetHMICooperating(true));
+
+  for (size_t i = 0; i < interfaces_to_request_.size(); ++i) {
+    hmi_capabilities->InterfaceResponseReceived(interfaces_to_request_[i]);
+  }
+}
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test

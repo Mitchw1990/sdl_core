@@ -110,6 +110,23 @@ TEST_F(VRGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   command->Run();
 }
 
+TEST_F(VRGetLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<VRGetLanguageResponse> command(
+      CreateCommand<VRGetLanguageResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              InterfaceResponseReceived(hmi_apis::FunctionID::VR_GetLanguage))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace vr_get_language_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

@@ -170,6 +170,24 @@ TEST_F(RCGetCapabilitiesResponseTest, RUN_SUCCESSS) {
   command->Run();
 }
 
+TEST_F(RCGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg = CreateCommandMsg();
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  RCGetCapabilitiesResponsePtr command(
+      CreateCommand<RCGetCapabilitiesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      InterfaceResponseReceived(hmi_apis::FunctionID::RC_GetCapabilities))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace rc_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

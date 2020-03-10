@@ -116,6 +116,24 @@ TEST_F(VRGetSupportedLanguagesResponseTest, RUN_UNSUCCESS) {
       am::hmi_response::languages));
 }
 
+TEST_F(VRGetSupportedLanguagesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  VRGetSupportedLanguagesResponsePtr command(
+      CreateCommand<VRGetSupportedLanguagesResponse>(command_msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      InterfaceResponseReceived(hmi_apis::FunctionID::VR_GetSupportedLanguages))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace vr_get_supported_languages_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

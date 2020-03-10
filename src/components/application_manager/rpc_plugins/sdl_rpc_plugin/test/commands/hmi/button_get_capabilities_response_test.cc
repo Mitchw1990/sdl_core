@@ -106,6 +106,23 @@ TEST_F(ButtonGetCapabilitiesResponseTest, Run_CodeAborted_SUCCESS) {
   command->Run();
 }
 
+TEST_F(ButtonGetCapabilitiesResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMsgParams();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  ResponsePtr command(CreateCommand<ButtonGetCapabilitiesResponse>(msg));
+
+  EXPECT_CALL(
+      mock_hmi_capabilities_,
+      InterfaceResponseReceived(hmi_apis::FunctionID::Buttons_GetCapabilities))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace button_get_capabilities_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test

@@ -108,6 +108,23 @@ TEST_F(UIGetLanguageResponseTest, Run_LanguageNotSet_SUCCESS) {
   command->Run();
 }
 
+TEST_F(UIGetLanguageResponseTest,
+       onTimeOut_Run_ResponseForInterface_ReceivedError) {
+  MessageSharedPtr msg = CreateMessage();
+  (*msg)[strings::params][hmi_response::code] =
+      hmi_apis::Common_Result::ABORTED;
+
+  std::shared_ptr<UIGetLanguageResponse> command(
+      CreateCommand<UIGetLanguageResponse>(msg));
+
+  EXPECT_CALL(mock_hmi_capabilities_,
+              InterfaceResponseReceived(hmi_apis::FunctionID::UI_GetLanguage))
+      .Times(2);
+
+  command->Run();
+  command->onTimeOut();
+}
+
 }  // namespace ui_get_language_response
 }  // namespace hmi_commands_test
 }  // namespace commands_test
