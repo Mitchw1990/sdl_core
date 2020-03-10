@@ -91,6 +91,10 @@ void UIGetLanguageResponse::Run() {
   event.raise(application_manager_.event_dispatcher());
 }
 
+void UIGetLanguageResponse::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+}
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

@@ -91,6 +91,11 @@ void RCGetCapabilitiesResponse::Run() {
   }
 }
 
+void RCGetCapabilitiesResponse::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+}
+
 }  // namespace commands
 
 }  // namespace sdl_rpc_plugin

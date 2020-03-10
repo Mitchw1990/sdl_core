@@ -73,6 +73,10 @@ void VIGetVehicleTypeResponse::Run() {
   }
 }
 
+void VIGetVehicleTypeResponse::onTimeOut() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+}
 }  // namespace commands
 
 }  // namespace vehicle_info_plugin

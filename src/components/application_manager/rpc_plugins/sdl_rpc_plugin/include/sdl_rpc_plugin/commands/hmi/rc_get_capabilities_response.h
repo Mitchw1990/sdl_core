@@ -61,10 +61,9 @@ class RCGetCapabilitiesResponse : public app_mngr::commands::ResponseFromHMI {
    **/
   virtual ~RCGetCapabilitiesResponse();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+  void Run() OVERRIDE;
+
+  void onTimeOut() OVERRIDE;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(RCGetCapabilitiesResponse);
