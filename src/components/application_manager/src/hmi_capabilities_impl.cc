@@ -750,7 +750,7 @@ void HMICapabilitiesImpl::set_seat_location_capability(
 void HMICapabilitiesImpl::Init(
     resumption::LastStateWrapperPtr last_state_wrapper) {
   hmi_language_handler_.Init(last_state_wrapper);
-  if (false == LoadCapabilitiesFromFile()) {
+  if (!LoadCapabilitiesFromFile()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   } else {
     LOG4CXX_INFO(logger_, "file hmi_capabilities.json was loaded");
@@ -2020,7 +2020,7 @@ void HMICapabilitiesImpl::update_capabilities_depending_on_version(
   set_ccpu_version(ccpu_version);
   DeleteCachedCapabilitiesFile();
 
-  if (false == LoadCapabilitiesFromFile()) {
+  if (!LoadCapabilitiesFromFile()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
   }
 
