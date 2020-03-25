@@ -1073,12 +1073,12 @@ TEST_F(
   const std::string hmi_capabilities_invalid_file =
       "hmi_capabilities_invalid_file.json";
 
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_invalid_file));
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillOnce(ReturnRef(file_cache_name_));
@@ -1111,12 +1111,12 @@ TEST_F(HMICapabilitiesTest,
   file_system::CreateFile(file_cache_name_);
   EXPECT_TRUE(file_system::FileExists(file_cache_name_));
 
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_invalid_file));
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillOnce(ReturnRef(file_cache_name_));
@@ -1132,7 +1132,7 @@ TEST_F(HMICapabilitiesTest,
 }
 
 TEST_F(HMICapabilitiesTest,
-       SaveCachedCapabilitiesToFile_CacheFileNameNotSpecified_NoNeedToSave) {
+       SaveCachedCapabilitiesToFile_CacheFileNameNotSpecified_ReturnLikeSuccess) {
   MockApplicationManager mock_app_mngr;
   event_engine_test::MockEventDispatcher mock_dispatcher;
   MockApplicationManagerSettings mock_application_manager_settings;
@@ -1140,10 +1140,10 @@ TEST_F(HMICapabilitiesTest,
   const std::string hmi_capabilities_empty_file_name = "";
   const std::vector<std::string> sections_to_update{hmi_response::language};
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillOnce(ReturnRef(hmi_capabilities_empty_file_name));
@@ -1162,10 +1162,10 @@ TEST_F(HMICapabilitiesTest, SaveCachedCapabilitiesToFile_ParseFile_Failed) {
   const smart_objects::CSmartSchema schema;
   const std::vector<std::string> sections_to_update{hmi_response::language};
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillOnce(ReturnRef(file_cache_name_));
@@ -1190,10 +1190,10 @@ TEST_F(HMICapabilitiesTest,
       hmi_response::display_capabilities};
   const std::string content_to_save = "{\"field\" : \"value\" }";
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillOnce(ReturnRef(file_cache_name_));
@@ -1247,10 +1247,10 @@ TEST_F(HMICapabilitiesTest, PrepareJsonValueForSaving_Success) {
   const std::vector<uint8_t> binary_data_to_save(content_to_save.begin(),
                                                  content_to_save.end());
 
-  EXPECT_CALL(mock_app_mngr, event_dispatcher())
-      .WillOnce(ReturnRef(mock_dispatcher));
-  EXPECT_CALL(mock_app_mngr, get_settings())
-      .WillRepeatedly(ReturnRef(mock_application_manager_settings));
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
   EXPECT_CALL(mock_application_manager_settings,
               hmi_capabilities_cache_file_name())
       .WillRepeatedly(ReturnRef(file_cache_name_));

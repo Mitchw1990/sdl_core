@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <stdint.h>
 #include <string>
 
 #include "application_manager/commands/command_request_test.h"
@@ -59,6 +58,7 @@ typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const std::string kStrNumber = "123";
 }  // namespace
 
 class TTSGetCapabilitiesRequestTest
@@ -66,12 +66,12 @@ class TTSGetCapabilitiesRequestTest
 
 TEST_F(TTSGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
+  (*command_msg)[am::strings::msg_params][am::strings::number] = kStrNumber;
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
-
   RequestToHMIPtr command(
       CreateCommand<TTSGetCapabilitiesRequest>(command_msg));
+
   EXPECT_CALL(mock_rpc_service_, SendMessageToHMI(command_msg));
   ASSERT_TRUE(command->Init());
 
@@ -86,14 +86,24 @@ TEST_F(TTSGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 TEST_F(TTSGetCapabilitiesRequestTest,
        onTimeOut_OnCapabilityInitialized_RemoveTTSGetCapabilities) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
+  (*command_msg)[am::strings::msg_params][am::strings::number] = kStrNumber;
+  (*command_msg)[am::strings::params][am::strings::connection_key] =
+      kConnectionKey;
   RequestToHMIPtr command(
       CreateCommand<TTSGetCapabilitiesRequest>(command_msg));
+
   EXPECT_CALL(
       mock_hmi_capabilities_,
       OnCapabilityInitialized(hmi_apis::FunctionID::TTS_GetCapabilities));
   ASSERT_TRUE(command->Init());
 
+  command->Run();
   command->onTimeOut();
+
+  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_type].asInt(),
+            CommandImpl::hmi_protocol_type_);
+  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_version].asInt(),
+            CommandImpl::protocol_version_);
 }
 
 }  // namespace tts_get_capabilities_request
