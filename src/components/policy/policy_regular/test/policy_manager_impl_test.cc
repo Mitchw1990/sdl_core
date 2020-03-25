@@ -1988,6 +1988,15 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ(0u, ret.size());
 }
 
+TEST_F(PolicyManagerImplTest2, SetMetaInfo_SetCCPUVersion_SUCCES) {
+  const std::string ccpu_version = "ccpu_version";
+  const std::string wersCountryCode = "wersCountryCode";
+  const std::string language = "language";
+
+  manager->GetCache()->SetMetaInfo(ccpu_version, wersCountryCode, language);
+  EXPECT_EQ((manager->GetCache())->GetCCPUVersionFromPT(), ccpu_version);
+}
+
 }  // namespace policy_test
 }  // namespace components
 }  // namespace test

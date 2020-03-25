@@ -1129,6 +1129,56 @@ TEST_F(HMICapabilitiesTest,
   EXPECT_FALSE(file_system::FileExists(file_cache_name_));
 }
 
+TEST_F(HMICapabilitiesTest,
+       OnCapabilityInitialized_RespondToAllPendingRAIRequestsIfTheyHold) {
+  MockApplicationManager mock_app_mngr;
+  NiceMock<event_engine_test::MockEventDispatcher> mock_dispatcher;
+  MockApplicationManagerSettings mock_application_manager_settings;
+
+  const std::string hmi_capabilities_file = "hmi_capabilities_sc2.json";
+
+  ON_CALL(mock_app_mngr, event_dispatcher())
+      .WillByDefault(ReturnRef(mock_dispatcher));
+  ON_CALL(mock_app_mngr, get_settings())
+      .WillByDefault(ReturnRef(mock_application_manager_settings));
+  EXPECT_CALL(mock_application_manager_settings, hmi_capabilities_file_name())
+      .WillRepeatedly(ReturnRef(hmi_capabilities_file));
+  EXPECT_CALL(mock_application_manager_settings,
+              hmi_capabilities_cache_file_name())
+      .WillRepeatedly(ReturnRef(file_cache_name_));
+  EXPECT_CALL(mock_dispatcher, add_observer(_, _, _)).Times(1);
+  EXPECT_CALL(mock_dispatcher, remove_observer(_)).Times(1);
+  EXPECT_CALL(mock_application_manager_settings, launch_hmi())
+      .WillOnce(Return(false));
+
+  auto hmi_capabilities =
+      std::make_shared<HMICapabilitiesForTesting>(mock_app_mngr);
+  hmi_capabilities->Init(last_state_wrapper_);
+
+  EXPECT_TRUE(hmi_capabilities->navigation_supported());
+
+  smart_objects::SmartObject navigation_capability_so =
+      *(hmi_capabilities->navigation_capability());
+  EXPECT_TRUE(navigation_capability_so.keyExists("sendLocationEnabled"));
+  EXPECT_TRUE(navigation_capability_so.keyExists("getWayPointsEnabled"));
+  EXPECT_TRUE(navigation_capability_so["sendLocationEnabled"].asBool());
+  EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
+  EXPECT_FALSE(navigation_capability_so["getWayPointsEnabled"].asBool());
+
+  EXPECT_TRUE(hmi_capabilities->LoadCapabilitiesFromFile());
+  EXPECT_CALL(mock_app_mngr, SetHMICooperating(true));
+
+  // all pending RAI requests are responded
+  EXPECT_CALL(mock_app_mngr, IsHMICooperating()).WillOnce(Return(true));
+  hmi_capabilities->OnCapabilityInitialized(
+      hmi_apis::FunctionID::UI_GetCapabilities);
+
+  // all pending RAI requests are hold, need respond them
+  EXPECT_CALL(mock_app_mngr, IsHMICooperating()).WillOnce(Return(false));
+  hmi_capabilities->OnCapabilityInitialized(
+      hmi_apis::FunctionID::UI_GetCapabilities);
+}
+
 }  // namespace application_manager_test
 }  // namespace components
 }  // namespace test
