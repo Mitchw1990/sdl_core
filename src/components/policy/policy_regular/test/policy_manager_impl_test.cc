@@ -1990,11 +1990,11 @@ TEST_F(PolicyManagerImplTest2,
 
 TEST_F(PolicyManagerImplTest2, SetMetaInfo_SetCCPUVersion_SUCCES) {
   const std::string ccpu_version = "ccpu_version";
-  const std::string wersCountryCode = "wersCountryCode";
+  const std::string wers_country_code = "wersCountryCode";
   const std::string language = "language";
 
-  manager->GetCache()->SetMetaInfo(ccpu_version, wersCountryCode, language);
-  EXPECT_EQ((manager->GetCache())->GetCCPUVersionFromPT(), ccpu_version);
+  manager->GetCache()->SetMetaInfo(ccpu_version, wers_country_code, language);
+  EXPECT_EQ(ccpu_version, (manager->GetCache())->GetCCPUVersionFromPT());
 }
 
 }  // namespace policy_test

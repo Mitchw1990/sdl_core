@@ -30,7 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "hmi/vi_get_vehicle_type_response.h"
+
 #include <string>
+
+#include "gtest/gtest.h"
 
 #include "application_manager/application.h"
 #include "application_manager/commands/commands_test.h"
@@ -40,8 +44,6 @@
 #include "application_manager/mock_message_helper.h"
 #include "application_manager/policies/mock_policy_handler_interface.h"
 #include "application_manager/smart_object_keys.h"
-#include "gtest/gtest.h"
-#include "hmi/vi_get_vehicle_type_response.h"
 #include "smart_objects/smart_object.h"
 #include "vehicle_info_plugin/commands/vi_command_request_test.h"
 

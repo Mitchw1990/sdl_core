@@ -30,14 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "hmi/rc_get_capabilities_request.h"
+
 #include <string>
+
+#include "gtest/gtest.h"
 
 #include "application_manager/commands/command_request_test.h"
 #include "application_manager/commands/commands_test.h"
 #include "application_manager/commands/request_to_hmi.h"
 #include "application_manager/smart_object_keys.h"
-#include "gtest/gtest.h"
-#include "hmi/rc_get_capabilities_request.h"
 #include "smart_objects/smart_object.h"
 
 namespace test {
