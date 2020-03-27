@@ -32,6 +32,10 @@
 
 #include "hmi/tts_is_ready_request.h"
 
+#include <memory>
+#include <set>
+#include <string>
+
 #include "gtest/gtest.h"
 
 #include "application_manager/commands/command_request_test.h"
@@ -65,6 +69,7 @@ typedef std::shared_ptr<TTSIsReadyRequest> TTSIsReadyRequestPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const std::string kStrNumber = "123";
 }  // namespace
 
 class TTSIsReadyRequestTest
@@ -74,7 +79,7 @@ class TTSIsReadyRequestTest
 
   void SetUpExpectations(const bool is_tts_cooperating_available,
                          const bool should_message_be_sent,
-                         const bool message_contain_param,
+                         const bool message_contains_param,
                          const am::HmiInterfaces::InterfaceState state) {
     if (should_message_be_sent) {
       ExpectSendMessagesToHMI();
@@ -82,7 +87,7 @@ class TTSIsReadyRequestTest
     EXPECT_CALL(mock_hmi_capabilities_,
                 set_is_tts_cooperating(is_tts_cooperating_available));
 
-    if (message_contain_param) {
+    if (message_contains_param) {
       ON_CALL(app_mngr_, hmi_interfaces())
           .WillByDefault(ReturnRef(mock_hmi_interfaces_));
       EXPECT_CALL(
@@ -127,15 +132,15 @@ class TTSIsReadyRequestTest
     EXPECT_CALL(mock_rpc_service_, ManageHMICommand(capabilities, _));
   }
 
-  void PrepareEvent(const bool message_contain_param,
-                    Event& event,
-                    const bool is_tts_cooperating_available = false) {
+  void PrepareEvent(const bool message_contains_param,
+                    const bool is_tts_cooperating_available,
+                    Event& out_event) {
     MessageSharedPtr msg = CreateMessage(smart_objects::SmartType_Map);
-    if (message_contain_param) {
+    if (message_contains_param) {
       (*msg)[am::strings::msg_params][am::strings::available] =
           is_tts_cooperating_available;
     }
-    event.set_smart_object(*msg);
+    out_event.set_smart_object(*msg);
   }
 
   void HMICapabilitiesExpectations() {
@@ -152,7 +157,7 @@ class TTSIsReadyRequestTest
 
 TEST_F(TTSIsReadyRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
+  (*command_msg)[am::strings::msg_params][am::strings::number] = kStrNumber;
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
@@ -162,24 +167,29 @@ TEST_F(TTSIsReadyRequestTest, RUN_SendRequest_SUCCESS) {
 
   command->Run();
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_type].asInt(),
-            CommandImpl::hmi_protocol_type_);
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_version].asInt(),
-            CommandImpl::protocol_version_);
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
 }
 
 TEST_F(TTSIsReadyRequestTest,
        Run_NoKeyAvailableInMessage_HmiInterfacesIgnored_CacheIsAbsent) {
   const bool is_tts_cooperating_available = false;
   const bool should_message_be_sent = true;
-  const bool message_contain_param = false;
+  const bool message_contains_param = false;
+  const am::HmiInterfaces::InterfaceState state =
+      am::HmiInterfaces::STATE_NOT_RESPONSE;
   Event event(hmi_apis::FunctionID::TTS_IsReady);
-  PrepareEvent(message_contain_param, event);
+  PrepareEvent(message_contains_param, is_tts_cooperating_available, event);
   HMICapabilitiesExpectations();
   SetUpExpectations(is_tts_cooperating_available,
                     should_message_be_sent,
-                    message_contain_param,
-                    am::HmiInterfaces::STATE_NOT_RESPONSE);
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -187,13 +197,18 @@ TEST_F(TTSIsReadyRequestTest,
        Run_KeyAvailableEqualToFalse_StateNotAvailable_CacheIsAbsent) {
   const bool is_tts_cooperating_available = false;
   const bool should_message_be_sent = false;
-  const bool message_contain_param = true;
+  const bool message_contains_param = true;
+  const am::HmiInterfaces::InterfaceState state =
+      am::HmiInterfaces::STATE_NOT_AVAILABLE;
   Event event(hmi_apis::FunctionID::TTS_IsReady);
-  PrepareEvent(message_contain_param, event);
+  PrepareEvent(message_contains_param, is_tts_cooperating_available, event);
   SetUpExpectations(is_tts_cooperating_available,
                     should_message_be_sent,
-                    message_contain_param,
-                    am::HmiInterfaces::STATE_NOT_AVAILABLE);
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -201,14 +216,19 @@ TEST_F(TTSIsReadyRequestTest,
        Run_KeyAvailableEqualToTrue_StateAvailable_CacheIsAbsnet) {
   const bool is_tts_cooperating_available = true;
   const bool should_message_be_sent = true;
-  const bool message_contain_param = true;
+  const bool message_contains_param = true;
+  const am::HmiInterfaces::InterfaceState state =
+      am::HmiInterfaces::STATE_AVAILABLE;
   Event event(hmi_apis::FunctionID::TTS_IsReady);
-  PrepareEvent(message_contain_param, event, is_tts_cooperating_available);
+  PrepareEvent(message_contains_param, is_tts_cooperating_available, event);
   HMICapabilitiesExpectations();
   SetUpExpectations(is_tts_cooperating_available,
                     should_message_be_sent,
-                    message_contain_param,
-                    am::HmiInterfaces::STATE_AVAILABLE);
+                    message_contains_param,
+                    state);
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->on_event(event);
 }
 
@@ -221,6 +241,9 @@ TEST_F(TTSIsReadyRequestTest,
   EXPECT_CALL(mock_hmi_capabilities_, GetDefaultInitializedCapabilities())
       .WillOnce(Return(interfaces_to_update));
   ExpectSendMessagesToHMI();
+  ASSERT_TRUE(command_->Init());
+
+  command_->Run();
   command_->onTimeOut();
 }
 

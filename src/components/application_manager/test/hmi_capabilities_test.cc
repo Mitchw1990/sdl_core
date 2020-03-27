@@ -33,7 +33,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/hmi_capabilities_for_testing.h"
+
 #include <algorithm>
+#include <memory>
 #include <string>
 
 #include "application_manager/hmi_capabilities.h"
@@ -43,7 +46,6 @@
 #include "smart_objects/enum_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-#include "application_manager/hmi_capabilities_for_testing.h"
 #include "application_manager/mock_application_manager.h"
 #include "application_manager/mock_application_manager_settings.h"
 #include "application_manager/mock_event_dispatcher.h"

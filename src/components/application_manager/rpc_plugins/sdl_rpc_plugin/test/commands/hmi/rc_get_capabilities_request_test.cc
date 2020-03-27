@@ -32,6 +32,7 @@
 
 #include "hmi/rc_get_capabilities_request.h"
 
+#include <memory>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -60,6 +61,7 @@ typedef std::shared_ptr<RequestToHMI> RequestToHMIPtr;
 
 namespace {
 const uint32_t kConnectionKey = 2u;
+const std::string kStrNumber = "123";
 }  // namespace
 
 class RCGetCapabilitiesRequestTest
@@ -67,7 +69,7 @@ class RCGetCapabilitiesRequestTest
 
 TEST_F(RCGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
-  (*command_msg)[am::strings::msg_params][am::strings::number] = "123";
+  (*command_msg)[am::strings::msg_params][am::strings::number] = kStrNumber;
   (*command_msg)[am::strings::params][am::strings::connection_key] =
       kConnectionKey;
 
@@ -77,10 +79,10 @@ TEST_F(RCGetCapabilitiesRequestTest, RUN_SendRequest_SUCCESS) {
 
   command->Run();
 
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_type].asInt(),
-            CommandImpl::hmi_protocol_type_);
-  EXPECT_EQ((*command_msg)[strings::params][strings::protocol_version].asInt(),
-            CommandImpl::protocol_version_);
+  EXPECT_EQ(CommandImpl::hmi_protocol_type_,
+            (*command_msg)[strings::params][strings::protocol_type].asInt());
+  EXPECT_EQ(CommandImpl::protocol_version_,
+            (*command_msg)[strings::params][strings::protocol_version].asInt());
 }
 
 TEST_F(RCGetCapabilitiesRequestTest,

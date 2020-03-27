@@ -32,6 +32,7 @@
 
 #include "hmi/vi_get_vehicle_type_response.h"
 
+#include <memory>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -78,7 +79,8 @@ class VIGetVehicleTypeResponseTest
   SmartObject capabilities_;
 };
 
-TEST_F(VIGetVehicleTypeResponseTest, RUN_SUCCESS) {
+TEST_F(VIGetVehicleTypeResponseTest,
+       RUN_ResultCodeSuccess_ChangeHMICapabilities) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::params][hmi_response::vehicle_type] = kVehicleType;
   (*command_msg)[strings::params][hmi_response::code] =
@@ -99,7 +101,9 @@ TEST_F(VIGetVehicleTypeResponseTest, RUN_SUCCESS) {
   EXPECT_TRUE((*command_msg)[am::strings::msg_params].keyExists(
       hmi_response::vehicle_type));
 }
-TEST_F(VIGetVehicleTypeResponseTest, RUN_UNSUCCESS) {
+
+TEST_F(VIGetVehicleTypeResponseTest,
+       RUN_ResultCodeNotSuccess_DontChangeHMICapabilities) {
   MessageSharedPtr command_msg(CreateMessage(smart_objects::SmartType_Map));
   (*command_msg)[strings::params][hmi_response::code] =
       hmi_apis::Common_Result::ABORTED;

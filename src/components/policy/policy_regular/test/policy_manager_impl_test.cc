@@ -1988,7 +1988,7 @@ TEST_F(PolicyManagerImplTest2,
   EXPECT_EQ(0u, ret.size());
 }
 
-TEST_F(PolicyManagerImplTest2, SetMetaInfo_SetCCPUVersion_SUCCES) {
+TEST_F(PolicyManagerImplTest2, SetMetaInfo_SetCCPUVersion_SUCCESS) {
   const std::string ccpu_version = "ccpu_version";
   const std::string wers_country_code = "wersCountryCode";
   const std::string language = "language";
